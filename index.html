@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MediBilan</title>
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MediBilan">
+<meta name="theme-color" content="#c0392b">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -220,13 +226,15 @@ function sortedEvents(){ return state.events.slice().sort(function(a,b){ return 
 function render(){ renderNav(); renderView(); }
 
 function renderNav(){
-  var items=[{id:'events',label:'Historique',icon:'📋'},{id:'detail',label:'Détail',icon:'🔎'},{id:'trend',label:'Évolution',icon:'📈'},{id:'ref',label:'Analyses',icon:'🗂️'}];
+  var items=[{id:'events',label:'Analyses',icon:'📋'},{id:'detail',label:'Résultats',icon:'🔎'},{id:'trend',label:'Évolution',icon:'📈'},{id:'ref',label:'Référentiel',icon:'🗂️'}];
   document.getElementById('nav').innerHTML = items.map(function(n){
     return '<button class="nb'+(state.view===n.id?' active':'')+'" onclick="setView(\''+n.id+'\')">'+n.icon+' '+n.label+'</button>';
   }).join('');
 }
 
 function setView(v){ state.view=v; renderNav(); renderView(); }
+
+function goToDetail(id){ state.detailId=id; setView('detail'); }
 
 function renderView(){
   var main=document.getElementById('main');
@@ -240,7 +248,7 @@ function renderView(){
 function viewEvents(){
   var evts=sortedEvents();
   var rows=evts.map(function(ev){
-    return '<tr class="erow" onclick="editEvent(\''+ev.id+'\')">'+
+    return '<tr class="erow" onclick="goToDetail(\''+ev.id+'\')">'+
       '<td class="dcell">'+fmtDate(ev.date)+'</td>'+
       '<td><span class="ttag t-'+ev.type.toLowerCase()+'">'+esc(ev.type)+'</span></td>'+
       '<td>'+esc(ev.lab)+'</td>'+
@@ -657,6 +665,17 @@ function toast(msg,cls){
 
 // ═══════════════════ INIT
 render();
+
+// ═══════════════════ SERVICE WORKER
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').then(function(reg) {
+      console.log('MediBilan SW enregistré :', reg.scope);
+    }).catch(function(err) {
+      console.warn('SW non enregistré :', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
