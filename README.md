@@ -1,4 +1,5 @@
-# analyses
-app de suivi des analyses médicales
+# MediBilan
+
+Application Web de suivi d'analyses médicales
 
 All rights reserved
