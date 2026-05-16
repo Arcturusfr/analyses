@@ -626,6 +626,34 @@ function addTheme(){
   if(label){ state.themes.push({id:uid(),label:label}); render(); }
 }
 
+// ═══════════════════ LOCALSTORAGE
+var LS_KEY = 'medibilan_data';
+
+function lsSave(){
+  try{
+    var data={version:1,themes:state.themes,analyses:state.analyses,events:state.events};
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  }catch(e){ console.warn('localStorage indisponible :', e); }
+}
+
+function lsLoad(){
+  try{
+    var raw=localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    var data=JSON.parse(raw);
+    if(!data.themes||!data.analyses||!data.events) return false;
+    state.themes=data.themes; state.analyses=data.analyses; state.events=data.events;
+    return true;
+  }catch(e){ return false; }
+}
+
+// Surcharge de render() pour sauvegarder automatiquement à chaque rendu
+var _renderBase = render;
+render = function(){
+  lsSave();
+  _renderBase();
+};
+
 // ═══════════════════ EXPORT / IMPORT
 function exportData(){
   var data={version:1,themes:state.themes,analyses:state.analyses,events:state.events};
@@ -664,7 +692,9 @@ function toast(msg,cls){
 }
 
 // ═══════════════════ INIT
+var restored = lsLoad();
 render();
+if(restored) toast('Données restaurées depuis la mémoire locale.','tok');
 
 // ═══════════════════ SERVICE WORKER
 if ('serviceWorker' in navigator) {
