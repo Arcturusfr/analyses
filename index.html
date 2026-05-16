@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MediBilan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f7f4;--surf:#fff;--surf2:#f0ede8;--brd:#e4dfd8;
+  --tx:#1a1714;--tx2:#6b6560;--acc:#c0392b;--acc2:#e74c3c;
+  --ok:#16a34a;--lo:#2563eb;--hi:#dc2626;--r:10px;
+  --sh:0 2px 12px rgba(0,0,0,.08);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+/* HEADER */
+#header{
+  background:var(--surf);border-bottom:1px solid var(--brd);
+  padding:.6rem 1rem;display:flex;align-items:center;flex-wrap:wrap;
+  gap:.4rem;position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 8px rgba(0,0,0,.06);
+}
+.brand{display:flex;align-items:baseline;gap:.35rem;flex-shrink:0}
+.brand-icon{font-size:1.25rem}
+.brand-name{font-family:'Crimson Pro',serif;font-size:1.35rem;color:var(--acc);font-weight:600}
+.brand-sub{font-size:.68rem;color:var(--tx2)}
+nav{display:flex;gap:.2rem;flex-wrap:wrap}
+.nb{display:flex;align-items:center;gap:.3rem;padding:.42rem .7rem;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--tx2);font-weight:500;transition:all .15s;white-space:nowrap}
+.nb:hover{background:var(--surf2);color:var(--tx)}
+.nb.active{background:var(--acc);color:#fff}
+.hactions{display:flex;gap:.3rem;margin-left:auto}
+.btool{background:var(--surf2);border:1px solid var(--brd);color:var(--tx2);padding:.38rem .65rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;cursor:pointer;white-space:nowrap}
+.btool:active{background:var(--brd)}
+
+/* MAIN */
+#main{padding:1rem;max-width:1100px;margin:0 auto}
+.view{animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.vhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:.5rem}
+.vhead h2{font-family:'Crimson Pro',serif;font-size:1.55rem;font-weight:600;color:var(--tx)}
+.hctrls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+
+/* BUTTONS */
+.bp{background:var(--acc);color:#fff;border:none;padding:.48rem .95rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;cursor:pointer}
+.bp:active{background:var(--acc2)}
+.bs{background:var(--surf2);color:var(--tx);border:1px solid var(--brd);padding:.48rem .95rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer}
+.bd{background:#dc2626;color:#fff;border:none;padding:.48rem 1.1rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer}
+.bd:active{background:#b91c1c}
+.bg{background:none;border:1.5px dashed var(--brd);color:var(--tx2);padding:.45rem .95rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer;margin-top:.65rem}
+.bg:hover{border-color:var(--acc);color:var(--acc)}
+.bic{background:none;border:none;cursor:pointer;padding:.18rem .28rem;border-radius:4px;font-size:.95rem}
+.bic:active{background:var(--surf2)}
+.sel{padding:.42rem .7rem;border:1px solid var(--brd);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--surf);color:var(--tx);max-width:100%}
+
+/* TABLES */
+.twrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;background:var(--surf);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+th{background:var(--surf2);padding:.55rem .7rem;text-align:left;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);border-bottom:1px solid var(--brd)}
+td{padding:.65rem .7rem;border-bottom:1px solid var(--brd);font-size:.82rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.erow{cursor:pointer;transition:background .1s}
+.erow:active{background:#fdf9f7}
+.dcell{font-weight:600;white-space:nowrap}
+.ccell{color:var(--tx2);font-style:italic;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ttag{display:inline-block;padding:.16rem .52rem;border-radius:999px;font-size:.7rem;font-weight:600}
+.t-sanguin{background:#fee2e2;color:#991b1b}
+.t-urinaire{background:#fef3c7;color:#92400e}
+.t-autre{background:#e0e7ff;color:#3730a3}
+.badge{display:inline-block;padding:.14rem .52rem;border-radius:999px;font-size:.7rem;font-weight:700;white-space:nowrap}
+.s-ok-b{background:#dcfce7;color:#15803d}
+.s-lo-b{background:#dbeafe;color:#1d4ed8}
+.s-hi-b{background:#fee2e2;color:#b91c1c}
+.s-ne-b{background:var(--surf2);color:var(--tx2)}
+.s-hi{background:#fff5f5}
+.s-lo{background:#eff6ff}
+.s-ok{background:#f0fdf4}
+.av{font-weight:700;font-size:.9rem}
+.ap{color:var(--tx2);font-style:italic;font-size:.76rem}
+.an{color:var(--tx2);font-size:.76rem;white-space:nowrap}
+.ac{color:var(--tx2);font-style:italic}
+.infob{font-size:.85rem;cursor:pointer;background:none;border:none;opacity:.55;padding:0 .18rem}
+
+/* THEME SECTION */
+.tsec{margin-bottom:.7rem}
+.thead2{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--acc);padding:.38rem 0 .32rem;border-bottom:2px solid var(--acc);margin-bottom:.45rem;display:flex;justify-content:space-between;align-items:center}
+.emeta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.7rem .9rem;background:var(--surf);border-radius:var(--r);border:1px solid var(--brd);margin-bottom:.8rem}
+.mi{font-size:.82rem;color:var(--tx2)}
+.mi-cmt{font-style:italic}
+
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);backdrop-filter:blur(3px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fi .15s ease}
+.pcard{background:var(--surf);border-radius:16px;padding:1.5rem;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.22);position:relative;text-align:center}
+.pclose{position:absolute;top:.7rem;right:.7rem;background:var(--surf2);border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.82rem;line-height:26px;text-align:center}
+.picon{font-size:2.1rem;margin-bottom:.55rem}
+.ptitle{font-family:'Crimson Pro',serif;font-size:1.25rem;font-weight:600;margin-bottom:.2rem}
+.pprec{color:var(--tx2);font-style:italic;margin-bottom:.55rem;font-size:.83rem}
+.pnorm{display:inline-flex;gap:.4rem;align-items:center;background:var(--surf2);padding:.32rem .75rem;border-radius:999px;font-size:.78rem;margin-bottom:.75rem;color:var(--tx2)}
+.pnorm strong{color:var(--tx)}
+.pinfo{font-size:.83rem;line-height:1.6;color:var(--tx2);text-align:left}
+.ccard{background:var(--surf);border-radius:16px;padding:1.65rem;max-width:360px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.22);text-align:center;animation:pin .18s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pin{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+.cicon{font-size:1.9rem;margin-bottom:.55rem}
+.ctitle{font-family:'Crimson Pro',serif;font-size:1.1rem;font-weight:600;margin-bottom:.45rem}
+.cmsg{font-size:.8rem;color:var(--tx2);line-height:1.55;margin-bottom:1.15rem}
+.cfooter{display:flex;justify-content:center;gap:.65rem}
+
+/* MODAL */
+.mcard{background:var(--surf);border-radius:16px;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.22)}
+.mcard.sm{max-width:460px}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.15rem;border-bottom:1px solid var(--brd);flex-shrink:0}
+.mhead h2{font-family:'Crimson Pro',serif;font-size:1.15rem;font-weight:600}
+.mbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:.9rem 1.15rem;display:flex;flex-direction:column;gap:.6rem}
+.mfoot{display:flex;justify-content:flex-end;gap:.55rem;padding:.8rem 1.15rem;border-top:1px solid var(--brd);flex-shrink:0}
+.frow{display:flex;gap:.55rem;flex-wrap:wrap}
+.frow label,.flbl{display:flex;flex-direction:column;gap:.22rem;font-size:.78rem;font-weight:500;color:var(--tx2);flex:1;min-width:100px}
+.flbl{width:100%}
+.frow input,.frow select,.flbl input,.flbl select,.flbl textarea{padding:.42rem .6rem;border:1px solid var(--brd);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--tx);background:var(--bg);-webkit-appearance:none}
+.flbl textarea{resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);background:var(--surf)}
+.stitle{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);padding-top:.45rem;border-top:1px solid var(--brd)}
+.tblk{margin-bottom:.35rem}
+.tlbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:.25rem;margin-top:.38rem}
+.rrow{padding:.28rem .38rem;border-radius:6px}
+.rrow.chk{background:#fdf9f7;border:1px solid var(--brd);margin-bottom:.22rem}
+.chklbl{display:flex;align-items:center;gap:.4rem;font-size:.8rem;cursor:pointer}
+.chklbl em{color:var(--tx2);font-size:.75rem}
+.rinputs{display:flex;gap:.38rem;margin-top:.28rem;padding-left:1.3rem;flex-wrap:wrap}
+.vinp{width:105px;padding:.3rem .5rem;border:1px solid var(--brd);border-radius:6px;font-size:.8rem;font-family:'DM Sans',sans-serif}
+.cinp{flex:1;min-width:90px;padding:.3rem .5rem;border:1px solid var(--brd);border-radius:6px;font-size:.8rem;font-family:'DM Sans',sans-serif}
+
+/* CHART */
+.chartbox{background:var(--surf);border-radius:var(--r);padding:1.15rem;box-shadow:var(--sh)}
+.cinfo{display:flex;align-items:center;gap:.55rem;margin-bottom:.85rem;flex-wrap:wrap}
+.cname{font-family:'Crimson Pro',serif;font-size:1.1rem;color:var(--tx)}
+.cprec{color:var(--tx2);font-style:italic;font-size:.8rem}
+.cnorm{background:var(--surf2);padding:.26rem .7rem;border-radius:999px;font-size:.75rem;color:var(--tx2);margin-left:auto}
+.chartsvg{width:100%;display:block;overflow:visible}
+.clegend{display:flex;gap:1.1rem;margin-top:.7rem;justify-content:center;flex-wrap:wrap}
+.legit{display:flex;align-items:center;gap:.32rem;font-size:.75rem;color:var(--tx2)}
+.legdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block}
+.legline{display:inline-block;width:16px;flex-shrink:0}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.1rem;left:50%;transform:translateX(-50%);padding:.55rem 1.1rem;border-radius:999px;font-size:.8rem;font-weight:500;font-family:'DM Sans',sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.18);z-index:2000;white-space:nowrap;pointer-events:none}
+.tok{background:#166534;color:#fff}
+.terr{background:#991b1b;color:#fff}
+.empty{color:var(--tx2);text-align:center;padding:2.2rem 0;font-style:italic}
+</style>
+</head>
+<body>
+<div id="header">
+  <div class="brand">
+    <span class="brand-icon">🩸</span>
+    <span class="brand-name">MediBilan</span>
+    <span class="brand-sub">Suivi d'analyses médicales</span>
+  </div>
+  <nav id="nav"></nav>
+  <div class="hactions">
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <button class="btool" onclick="document.getElementById('importFile').click()">⬆️ Import</button>
+    <button class="btool" onclick="exportData()">⬇️ Export</button>
+  </div>
+</div>
+<div id="main"></div>
+<div id="overlayRoot"></div>
+
+<script>
+// ═══════════════════ DATA
+var state = {
+  view: 'events',
+  detailId: null,
+  trendAnaId: null,
+  themes: [
+    {id:'hema',label:'Hématologie'},
+    {id:'bio', label:'Biochimie'},
+    {id:'lip', label:'Bilan lipidique'},
+    {id:'thy', label:'Thyroïde'}
+  ],
+  analyses: [
+    {id:'a1', themeId:'hema',label:'Hématies',        precision:'Globules rouges',     unit:'T/L',   normMin:4.2,  normMax:5.7,  info:"Les hématies transportent l'oxygène grâce à l'hémoglobine. Un taux bas peut indiquer une anémie."},
+    {id:'a2', themeId:'hema',label:'Hémoglobine',     precision:'',                    unit:'g/dL',  normMin:12,   normMax:17,   info:"Protéine des globules rouges assurant le transport de l'oxygène. Valeurs normales différentes selon le sexe."},
+    {id:'a3', themeId:'hema',label:'Hématocrite',     precision:'',                    unit:'%',     normMin:37,   normMax:52,   info:"Pourcentage du volume sanguin occupé par les globules rouges."},
+    {id:'a4', themeId:'hema',label:'Leucocytes',      precision:'Globules blancs',     unit:'G/L',   normMin:4.0,  normMax:10.0, info:"Cellules de défense immunitaire. Un taux élevé peut signaler une infection ou une inflammation."},
+    {id:'a5', themeId:'hema',label:'Plaquettes',      precision:'Thrombocytes',        unit:'G/L',   normMin:150,  normMax:400,  info:"Les plaquettes interviennent dans la coagulation sanguine. Un taux bas augmente le risque de saignement."},
+    {id:'a6', themeId:'bio', label:'Glycémie',        precision:'À jeun',              unit:'g/L',   normMin:0.70, normMax:1.10, info:"Taux de glucose dans le sang. Un taux supérieur à 1,26 g/L à jeun à deux reprises indique un diabète."},
+    {id:'a7', themeId:'bio', label:'Créatinine',      precision:'',                    unit:'µmol/L',normMin:50,   normMax:110,  info:"Déchet musculaire éliminé par les reins. Un taux élevé peut indiquer une insuffisance rénale."},
+    {id:'a8', themeId:'bio', label:'Uricémie',        precision:'Acide urique',        unit:'µmol/L',normMin:180,  normMax:420,  info:"Un excès d'acide urique (hyperuricémie) peut provoquer des crises de goutte et des calculs rénaux."},
+    {id:'a9', themeId:'lip', label:'Cholestérol total',precision:'',                   unit:'g/L',   normMin:0,    normMax:2.0,  info:"Indispensable aux membranes cellulaires. Un excès augmente le risque cardiovasculaire."},
+    {id:'a10',themeId:'lip', label:'HDL-Cholestérol', precision:'Bon cholestérol',     unit:'g/L',   normMin:0.40, normMax:2.0,  info:"Transporte le cholestérol vers le foie pour élimination. Un taux élevé est protecteur."},
+    {id:'a11',themeId:'lip', label:'LDL-Cholestérol', precision:'Mauvais cholestérol', unit:'g/L',   normMin:0,    normMax:1.30, info:"Dépose le cholestérol dans les artères. Un taux élevé augmente le risque cardiovasculaire."},
+    {id:'a12',themeId:'lip', label:'Triglycérides',   precision:'',                    unit:'g/L',   normMin:0,    normMax:1.50, info:"Graisses circulantes. Taux élevé souvent lié à l'alimentation et à l'alcool."},
+    {id:'a13',themeId:'thy', label:'TSH',             precision:'Thyréostimuline',     unit:'mUI/L', normMin:0.27, normMax:4.20, info:"Hormone stimulant la thyroïde. Élevée = hypothyroïdie, basse = hyperthyroïdie."}
+  ],
+  events: [
+    {id:'e1',date:'2023-03-15',lab:'Laboratoire Central',type:'Sanguin',comment:'Bilan annuel',
+     results:[{analysisId:'a1',value:'4.85',comment:''},{analysisId:'a2',value:'14.2',comment:''},{analysisId:'a4',value:'6.2',comment:''},{analysisId:'a5',value:'245',comment:''},{analysisId:'a6',value:'0.92',comment:'À jeun 12h'},{analysisId:'a9',value:'1.95',comment:''},{analysisId:'a10',value:'0.52',comment:''},{analysisId:'a11',value:'1.22',comment:''},{analysisId:'a12',value:'1.10',comment:''},{analysisId:'a13',value:'2.10',comment:''}]},
+    {id:'e2',date:'2023-09-22',lab:'BioAnalyses Plus',type:'Sanguin',comment:'Contrôle prescription',
+     results:[{analysisId:'a1',value:'4.70',comment:''},{analysisId:'a2',value:'13.9',comment:''},{analysisId:'a4',value:'7.8',comment:'Légère élévation'},{analysisId:'a5',value:'230',comment:''},{analysisId:'a6',value:'0.98',comment:''},{analysisId:'a9',value:'2.05',comment:''},{analysisId:'a10',value:'0.48',comment:''},{analysisId:'a11',value:'1.35',comment:'Légèrement élevé'},{analysisId:'a12',value:'1.45',comment:''},{analysisId:'a13',value:'1.85',comment:''}]},
+    {id:'e3',date:'2024-02-10',lab:'Laboratoire Central',type:'Sanguin',comment:'Bilan annuel + thyroïde',
+     results:[{analysisId:'a1',value:'4.92',comment:''},{analysisId:'a2',value:'14.5',comment:''},{analysisId:'a4',value:'5.9',comment:''},{analysisId:'a5',value:'258',comment:''},{analysisId:'a6',value:'0.89',comment:''},{analysisId:'a7',value:'78',comment:''},{analysisId:'a8',value:'340',comment:''},{analysisId:'a9',value:'1.88',comment:''},{analysisId:'a10',value:'0.55',comment:''},{analysisId:'a11',value:'1.10',comment:''},{analysisId:'a12',value:'0.98',comment:''},{analysisId:'a13',value:'3.20',comment:''}]},
+    {id:'e4',date:'2024-11-05',lab:'BioAnalyses Plus',type:'Sanguin',comment:'Contrôle semestriel',
+     results:[{analysisId:'a1',value:'4.78',comment:''},{analysisId:'a2',value:'14.1',comment:''},{analysisId:'a4',value:'6.5',comment:''},{analysisId:'a5',value:'241',comment:''},{analysisId:'a6',value:'0.95',comment:''},{analysisId:'a7',value:'82',comment:''},{analysisId:'a9',value:'1.92',comment:''},{analysisId:'a10',value:'0.51',comment:''},{analysisId:'a11',value:'1.18',comment:''},{analysisId:'a12',value:'1.20',comment:''},{analysisId:'a13',value:'2.40',comment:''}]}
+  ]
+};
+
+// ═══════════════════ HELPERS
+var _editEv = null;
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso){ if(!iso) return '—'; var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function getStatus(v,mn,mx){ var n=parseFloat(v); if(isNaN(n)||String(v)==='') return 'ne'; if(n<mn) return 'lo'; if(n>mx) return 'hi'; return 'ok'; }
+function statusLabel(s){ return {ok:'Normal',lo:'Bas',hi:'Élevé',ne:'—'}[s]; }
+function getAna(id){ for(var i=0;i<state.analyses.length;i++) if(state.analyses[i].id===id) return state.analyses[i]; return null; }
+function sortedEvents(){ return state.events.slice().sort(function(a,b){ return b.date.localeCompare(a.date); }); }
+
+// ═══════════════════ RENDER
+function render(){ renderNav(); renderView(); }
+
+function renderNav(){
+  var items=[{id:'events',label:'Historique',icon:'📋'},{id:'detail',label:'Détail',icon:'🔎'},{id:'trend',label:'Évolution',icon:'📈'},{id:'ref',label:'Analyses',icon:'🗂️'}];
+  document.getElementById('nav').innerHTML = items.map(function(n){
+    return '<button class="nb'+(state.view===n.id?' active':'')+'" onclick="setView(\''+n.id+'\')">'+n.icon+' '+n.label+'</button>';
+  }).join('');
+}
+
+function setView(v){ state.view=v; renderNav(); renderView(); }
+
+function renderView(){
+  var main=document.getElementById('main');
+  if(state.view==='events') main.innerHTML=viewEvents();
+  else if(state.view==='detail') main.innerHTML=viewDetail();
+  else if(state.view==='trend') main.innerHTML=viewTrend();
+  else if(state.view==='ref') main.innerHTML=viewRef();
+}
+
+// ═══════════════════ VIEW EVENTS
+function viewEvents(){
+  var evts=sortedEvents();
+  var rows=evts.map(function(ev){
+    return '<tr class="erow" onclick="editEvent(\''+ev.id+'\')">'+
+      '<td class="dcell">'+fmtDate(ev.date)+'</td>'+
+      '<td><span class="ttag t-'+ev.type.toLowerCase()+'">'+esc(ev.type)+'</span></td>'+
+      '<td>'+esc(ev.lab)+'</td>'+
+      '<td style="color:var(--tx2)">'+ev.results.length+' rés.</td>'+
+      '<td class="ccell">'+esc(ev.comment)+'</td>'+
+      '<td onclick="event.stopPropagation()">'+
+        '<button class="bic" onclick="editEvent(\''+ev.id+'\')">✏️</button>'+
+        '<button class="bic" onclick="askDelEv(\''+ev.id+'\',\''+esc(fmtDate(ev.date))+'\',\''+esc(ev.lab)+'\')">🗑️</button>'+
+      '</td></tr>';
+  }).join('');
+  return '<div class="view">'+
+    '<div class="vhead"><h2>Historique des prélèvements</h2><button class="bp" onclick="newEvent()">+ Nouveau</button></div>'+
+    (evts.length===0?'<p class="empty">Aucun événement enregistré.</p>':'')+
+    '<div class="twrap"><table>'+
+      '<thead><tr><th>Date</th><th>Type</th><th>Laboratoire</th><th>Analyses</th><th>Commentaire</th><th></th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div></div>';
+}
+
+// ═══════════════════ VIEW DETAIL
+function viewDetail(){
+  var evts=sortedEvents();
+  if(!state.detailId && evts.length) state.detailId=evts[0].id;
+  var ev=null; for(var i=0;i<evts.length;i++) if(evts[i].id===state.detailId){ev=evts[i];break;}
+  var opts=evts.map(function(e){
+    return '<option value="'+e.id+'"'+(e.id===state.detailId?' selected':'')+'>'+esc(fmtDate(e.date))+' — '+esc(e.lab)+'</option>';
+  }).join('');
+  var body=ev?buildDetailBody(ev):'<p class="empty">Sélectionnez un prélèvement.</p>';
+  return '<div class="view">'+
+    '<div class="vhead"><h2>Détail d\'un prélèvement</h2>'+
+    '<div class="hctrls">'+
+      '<select class="sel" onchange="state.detailId=this.value;renderView()">'+opts+'</select>'+
+      (ev?'<button class="bs" onclick="editEvent(\''+ev.id+'\')">✏️ Modifier</button>':'')+
+    '</div></div>'+body+'</div>';
+}
+
+function buildDetailBody(ev){
+  var meta='<div class="emeta">'+
+    '<span class="mi">📅 '+fmtDate(ev.date)+'</span>'+
+    '<span class="mi">🏥 '+esc(ev.lab)+'</span>'+
+    '<span class="ttag t-'+ev.type.toLowerCase()+'">'+esc(ev.type)+'</span>'+
+    (ev.comment?'<span class="mi mi-cmt">💬 '+esc(ev.comment)+'</span>':'')+
+  '</div>';
+  var thSections=state.themes.map(function(th){
+    var rows=[];
+    for(var i=0;i<ev.results.length;i++){
+      var r=ev.results[i]; var a=getAna(r.analysisId);
+      if(a && a.themeId===th.id) rows.push({r:r,a:a});
+    }
+    if(!rows.length) return '';
+    var trs=rows.map(function(x){
+      var s=getStatus(x.r.value,x.a.normMin,x.a.normMax);
+      return '<tr>'+
+        '<td style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+';font-weight:600">'+esc(x.a.label)+'</td>'+
+        '<td class="ap" style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+'">'+esc(x.a.precision)+'</td>'+
+        '<td class="av" style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+'">'+esc(x.r.value)+'</td>'+
+        '<td class="an" style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+'">'+esc(x.a.unit)+'</td>'+
+        '<td class="an" style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+'">'+x.a.normMin+' – '+x.a.normMax+'</td>'+
+        '<td style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+'"><span class="badge s-'+s+'-b">'+statusLabel(s)+'</span></td>'+
+        '<td class="ac" style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+'">'+esc(x.r.comment)+'</td>'+
+        '<td style="background:'+(s==='hi'?'#fff5f5':s==='lo'?'#eff6ff':s==='ok'?'#f0fdf4':'inherit')+'"><button class="infob" onclick="showInfo(\''+x.a.id+'\')">ℹ️</button></td>'+
+      '</tr>';
+    }).join('');
+    return '<div class="tsec"><div class="thead2">'+esc(th.label)+'</div>'+
+      '<div class="twrap"><table>'+
+        '<thead><tr><th>Analyse</th><th>Précision</th><th>Résultat</th><th>Unité</th><th>Normalité</th><th>Statut</th><th>Commentaire</th><th></th></tr></thead>'+
+        '<tbody>'+trs+'</tbody></table></div></div>';
+  }).join('');
+  return meta+thSections;
+}
+
+// ═══════════════════ VIEW TREND
+function viewTrend(){
+  if(!state.trendAnaId && state.analyses.length) state.trendAnaId=state.analyses[0].id;
+  var a=getAna(state.trendAnaId);
+  var opts=state.themes.map(function(th){
+    var anas=state.analyses.filter(function(x){return x.themeId===th.id;});
+    if(!anas.length) return '';
+    return '<optgroup label="'+esc(th.label)+'">'+anas.map(function(x){
+      return '<option value="'+x.id+'"'+(x.id===state.trendAnaId?' selected':'')+'>'+esc(x.label)+(x.precision?' ('+esc(x.precision)+')':'')+' </option>';
+    }).join('')+'</optgroup>';
+  }).join('');
+  var chartHtml='';
+  if(a){
+    var pts=[];
+    var evts=state.events.slice().sort(function(x,y){return x.date.localeCompare(y.date);});
+    for(var i=0;i<evts.length;i++){
+      var ev=evts[i];
+      for(var j=0;j<ev.results.length;j++){
+        if(ev.results[j].analysisId===a.id){
+          var v=parseFloat(ev.results[j].value);
+          if(!isNaN(v)) pts.push({date:fmtDate(ev.date),v:v});
+          break;
+        }
+      }
+    }
+    chartHtml=pts.length?buildSVG(pts,a):'<p class="empty">Aucune donnée disponible pour cette analyse.</p>';
+  }
+  return '<div class="view">'+
+    '<div class="vhead"><h2>Évolution dans le temps</h2>'+
+      '<select class="sel" onchange="state.trendAnaId=this.value;renderView()">'+opts+'</select>'+
+    '</div>'+chartHtml+'</div>';
+}
+
+function buildSVG(pts,a){
+  var W=600,H=260,ml=78,mr=52,mt=24,mb=36;
+  var iw=W-ml-mr, ih=H-mt-mb, n=pts.length;
+  var vals=pts.map(function(p){return p.v;});
+  var allV=vals.concat([a.normMin,a.normMax]);
+  var vmin=Math.min.apply(null,allV), vmax=Math.max.apply(null,allV);
+  var pad=(vmax-vmin)*0.15||0.5; vmin-=pad; vmax+=pad;
+  function sx(i){return ml+(n===1?iw/2:i*iw/(n-1));}
+  function sy(v){return mt+ih-(v-vmin)/(vmax-vmin)*ih;}
+
+  // grid
+  var grid='',ylbl='';
+  for(var s=0;s<=4;s++){
+    var gv=vmin+(vmax-vmin)*s/4, gy=sy(gv);
+    grid+='<line x1="'+ml+'" y1="'+gy+'" x2="'+(W-mr)+'" y2="'+gy+'" stroke="#e2e8f0" stroke-width="1"/>';
+    ylbl+='<text x="'+(ml-6)+'" y="'+(gy+4)+'" text-anchor="end" font-size="10" fill="#94a3b8">'+gv.toFixed(2)+'</text>';
+  }
+  // ref lines
+  var ymx=sy(a.normMax),ymn=sy(a.normMin);
+  var refs='<line x1="'+ml+'" y1="'+ymx+'" x2="'+(W-mr)+'" y2="'+ymx+'" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,4"/>'+
+    '<text x="'+(W-mr+4)+'" y="'+(ymx+4)+'" font-size="10" fill="#ef4444">Max</text>'+
+    '<line x1="'+ml+'" y1="'+ymn+'" x2="'+(W-mr)+'" y2="'+ymn+'" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,4"/>'+
+    '<text x="'+(W-mr+4)+'" y="'+(ymn+4)+'" font-size="10" fill="#f59e0b">Min</text>';
+  // path
+  var pd=pts.map(function(p,i){return (i===0?'M':'L')+sx(i)+','+sy(p.v);}).join(' ');
+  // x labels
+  var xl='';
+  var step=n>6?Math.ceil(n/5):1;
+  for(var i=0;i<pts.length;i++){
+    if(i%step===0) xl+='<text x="'+sx(i)+'" y="'+(H-mb+16)+'" text-anchor="middle" font-size="10" fill="#94a3b8">'+esc(pts[i].date)+'</text>';
+  }
+  // x axis label (unit)
+  var uxl='<text x="'+(W/2)+'" y="'+(H-2)+'" text-anchor="middle" font-size="10" fill="#94a3b8">'+esc(a.unit)+'</text>';
+  // dots
+  var dots='';
+  var cols={ok:'#16a34a',lo:'#2563eb',hi:'#dc2626',ne:'#3b82f6'};
+  for(var i=0;i<pts.length;i++){
+    var s2=getStatus(pts[i].v,a.normMin,a.normMax);
+    dots+='<circle cx="'+sx(i)+'" cy="'+sy(pts[i].v)+'" r="5" fill="'+(cols[s2]||'#3b82f6')+'" stroke="#fff" stroke-width="2"><title>'+esc(pts[i].date)+' : '+pts[i].v+' '+esc(a.unit)+'</title></circle>';
+  }
+  var svg='<svg class="chartsvg" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+
+    grid+ylbl+
+    '<path d="'+pd+'" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>'+
+    refs+xl+uxl+dots+'</svg>';
+  return '<div class="chartbox">'+
+    '<div class="cinfo">'+
+      '<span class="cname">'+esc(a.label)+'</span>'+
+      (a.precision?'<span class="cprec">'+esc(a.precision)+'</span>':'')+
+      '<span class="cnorm">Norme : '+a.normMin+' – '+a.normMax+' '+esc(a.unit)+'</span>'+
+    '</div>'+svg+
+    '<div class="clegend">'+
+      '<span class="legit"><span class="legdot" style="background:#3b82f6;display:inline-block;width:9px;height:9px;border-radius:50%"></span>Résultat mesuré</span>'+
+      '<span class="legit"><span style="display:inline-block;width:16px;border-bottom:2px dashed #ef4444"></span>Max</span>'+
+      '<span class="legit"><span style="display:inline-block;width:16px;border-bottom:2px dashed #f59e0b"></span>Min</span>'+
+    '</div></div>';
+}
+
+// ═══════════════════ VIEW REF
+function viewRef(){
+  var sections=state.themes.map(function(th){
+    var list=state.analyses.filter(function(a){return a.themeId===th.id;});
+    var rows=list.map(function(a){
+      return '<tr>'+
+        '<td>'+esc(a.label)+'</td><td class="ap">'+esc(a.precision)+'</td>'+
+        '<td>'+esc(a.unit)+'</td><td>'+a.normMin+'</td><td>'+a.normMax+'</td>'+
+        '<td>'+
+          '<button class="bic" onclick="editAnalysis(\''+a.id+'\')">✏️</button>'+
+          '<button class="bic" onclick="askDelAna(\''+a.id+'\',\''+esc(a.label)+'\')">🗑️</button>'+
+        '</td></tr>';
+    }).join('');
+    return '<div class="tsec"><div class="thead2">'+esc(th.label)+
+      '<button class="bic" onclick="askDelTheme(\''+th.id+'\',\''+esc(th.label)+'\')">🗑️</button></div>'+
+      (list.length===0?'<p style="font-size:.78rem;color:var(--tx2);padding:.35rem 0">Aucune analyse dans ce thème.</p>':'')+
+      (list.length?'<div class="twrap"><table>'+
+        '<thead><tr><th>Intitulé</th><th>Précision</th><th>Unité</th><th>Norme min</th><th>Norme max</th><th></th></tr></thead>'+
+        '<tbody>'+rows+'</tbody></table></div>':'')+
+    '</div>';
+  }).join('');
+  return '<div class="view">'+
+    '<div class="vhead"><h2>Référentiel des analyses</h2><button class="bp" onclick="newAnalysis()">+ Nouvelle analyse</button></div>'+
+    sections+
+    '<button class="bg" onclick="addTheme()">+ Ajouter un thème</button></div>';
+}
+
+// ═══════════════════ OVERLAYS
+function openOverlay(html){
+  closeOverlay();
+  var d=document.createElement('div');
+  d.className='overlay'; d.id='ov';
+  d.innerHTML='<div>'+html+'</div>';
+  d.addEventListener('click',function(e){if(e.target===d) closeOverlay();});
+  document.getElementById('overlayRoot').appendChild(d);
+}
+function closeOverlay(){
+  var o=document.getElementById('ov'); if(o) o.remove();
+}
+
+function showInfo(aid){
+  var a=getAna(aid); if(!a) return;
+  openOverlay('<div class="pcard">'+
+    '<button class="pclose" onclick="closeOverlay()">✕</button>'+
+    '<div class="picon">🔬</div>'+
+    '<h3 class="ptitle">'+esc(a.label)+'</h3>'+
+    (a.precision?'<p class="pprec">'+esc(a.precision)+'</p>':'')+
+    '<div class="pnorm"><span>Valeurs normales :</span><strong>'+a.normMin+' – '+a.normMax+' '+esc(a.unit)+'</strong></div>'+
+    '<p class="pinfo">'+esc(a.info||'Aucune information disponible.')+'</p>'+
+  '</div>');
+}
+
+function confirm2(title,msg,onOk){
+  openOverlay('<div class="ccard">'+
+    '<div class="cicon">⚠️</div>'+
+    '<h3 class="ctitle">'+esc(title)+'</h3>'+
+    '<p class="cmsg">'+esc(msg)+'</p>'+
+    '<div class="cfooter">'+
+      '<button class="bs" onclick="closeOverlay()">Annuler</button>'+
+      '<button class="bd" id="cbtn">Supprimer</button>'+
+    '</div></div>');
+  document.getElementById('cbtn').onclick=function(){closeOverlay();onOk();};
+}
+
+function askDelEv(id,date,lab){
+  confirm2('Supprimer ce prélèvement ?','Vous allez supprimer le prélèvement du '+date+' ('+lab+'). Cette action est irréversible.',function(){
+    state.events=state.events.filter(function(e){return e.id!==id;});
+    if(state.detailId===id) state.detailId=null;
+    render();
+  });
+}
+function askDelAna(id,label){
+  confirm2('Supprimer cette analyse ?','« '+label+' » sera supprimée de tous les prélèvements.',function(){
+    state.analyses=state.analyses.filter(function(a){return a.id!==id;});
+    state.events=state.events.map(function(e){
+      return Object.assign({},e,{results:e.results.filter(function(r){return r.analysisId!==id;})});
+    });
+    render();
+  });
+}
+function askDelTheme(id,label){
+  confirm2('Supprimer le thème « '+label+' » ?','Toutes les analyses de ce thème et leurs résultats seront supprimés définitivement.',function(){
+    var ids=state.analyses.filter(function(a){return a.themeId===id;}).map(function(a){return a.id;});
+    state.analyses=state.analyses.filter(function(a){return a.themeId!==id;});
+    state.events=state.events.map(function(e){
+      return Object.assign({},e,{results:e.results.filter(function(r){return ids.indexOf(r.analysisId)===-1;})});
+    });
+    state.themes=state.themes.filter(function(t){return t.id!==id;});
+    render();
+  });
+}
+
+// ═══════════════════ EVENT MODAL
+function newEvent(){ openEventModal(null); }
+function editEvent(id){
+  var ev=null; for(var i=0;i<state.events.length;i++) if(state.events[i].id===id){ev=state.events[i];break;}
+  openEventModal(ev);
+}
+
+function openEventModal(ev){
+  var isNew=!ev;
+  _editEv=ev?JSON.parse(JSON.stringify(ev)):{id:uid(),date:'',lab:'',type:'Sanguin',comment:'',results:[]};
+  var thBlocks=state.themes.map(function(th){
+    var anas=state.analyses.filter(function(a){return a.themeId===th.id;});
+    if(!anas.length) return '';
+    var rows=anas.map(function(a){
+      var r=null;
+      for(var i=0;i<_editEv.results.length;i++) if(_editEv.results[i].analysisId===a.id){r=_editEv.results[i];break;}
+      var chk=!!r;
+      return '<div class="rrow'+(chk?' chk':'')+'" id="rr-'+a.id+'">'+
+        '<label class="chklbl">'+
+          '<input type="checkbox" '+(chk?'checked':'')+' onchange="toggleAna(\''+a.id+'\',this.checked)">'+
+          '<span>'+esc(a.label)+(a.precision?'<em> ('+esc(a.precision)+')</em>':'')+' </span>'+
+        '</label>'+
+        '<div class="rinputs" id="ri-'+a.id+'" style="'+(chk?'':'display:none')+'">'+
+          '<input class="vinp" type="text" placeholder="Valeur ('+esc(a.unit)+')" value="'+esc(r?r.value:'')+'" oninput="setRV(\''+a.id+'\',this.value)">'+
+          '<input class="cinp" type="text" placeholder="Commentaire" value="'+esc(r?r.comment:'')+'" oninput="setRC(\''+a.id+'\',this.value)">'+
+        '</div></div>';
+    }).join('');
+    return '<div class="tblk"><div class="tlbl">'+esc(th.label)+'</div>'+rows+'</div>';
+  }).join('');
+
+  openOverlay('<div class="mcard">'+
+    '<div class="mhead"><h2>'+(isNew?'Nouveau prélèvement':'Modifier le prélèvement')+'</h2><button class="pclose" onclick="closeOverlay()">✕</button></div>'+
+    '<div class="mbody">'+
+      '<div class="frow">'+
+        '<label>Date<input type="date" id="f-date" value="'+esc(_editEv.date)+'"></label>'+
+        '<label>Laboratoire<input type="text" id="f-lab" value="'+esc(_editEv.lab)+'" placeholder="Nom du laboratoire"></label>'+
+        '<label>Type<select id="f-type">'+
+          ['Sanguin','Urinaire','Autre'].map(function(t){return '<option'+((_editEv.type===t)?' selected':'')+'>'+t+'</option>';}).join('')+
+        '</select></label>'+
+      '</div>'+
+      '<label class="flbl">Commentaire<input type="text" id="f-comment" value="'+esc(_editEv.comment)+'" placeholder="Notes…"></label>'+
+      '<div class="stitle">Résultats</div>'+
+      thBlocks+
+    '</div>'+
+    '<div class="mfoot">'+
+      '<button class="bs" onclick="closeOverlay()">Annuler</button>'+
+      '<button class="bp" onclick="saveEvent(\''+_editEv.id+'\','+isNew+')">Enregistrer</button>'+
+    '</div></div>');
+}
+
+function toggleAna(aid,checked){
+  var ri=document.getElementById('ri-'+aid), rr=document.getElementById('rr-'+aid);
+  if(checked){
+    _editEv.results.push({analysisId:aid,value:'',comment:''});
+    if(ri) ri.style.display=''; if(rr) rr.classList.add('chk');
+  } else {
+    _editEv.results=_editEv.results.filter(function(r){return r.analysisId!==aid;});
+    if(ri) ri.style.display='none'; if(rr) rr.classList.remove('chk');
+  }
+}
+function setRV(aid,v){ for(var i=0;i<_editEv.results.length;i++) if(_editEv.results[i].analysisId===aid){_editEv.results[i].value=v;break;} }
+function setRC(aid,v){ for(var i=0;i<_editEv.results.length;i++) if(_editEv.results[i].analysisId===aid){_editEv.results[i].comment=v;break;} }
+
+function saveEvent(id,isNew){
+  _editEv.date=document.getElementById('f-date').value;
+  _editEv.lab=document.getElementById('f-lab').value;
+  _editEv.type=document.getElementById('f-type').value;
+  _editEv.comment=document.getElementById('f-comment').value;
+  if(isNew){ state.events.push(_editEv); }
+  else { for(var i=0;i<state.events.length;i++) if(state.events[i].id===id){state.events[i]=_editEv;break;} }
+  closeOverlay(); render();
+}
+
+// ═══════════════════ ANALYSIS MODAL
+function newAnalysis(){ openAnalysisModal(null); }
+function editAnalysis(id){
+  var an=getAna(id); openAnalysisModal(an);
+}
+
+function openAnalysisModal(an){
+  var isNew=!an;
+  var cur=an?JSON.parse(JSON.stringify(an)):{id:uid(),themeId:(state.themes[0]?state.themes[0].id:''),label:'',precision:'',unit:'',normMin:'',normMax:'',info:''};
+  openOverlay('<div class="mcard sm">'+
+    '<div class="mhead"><h2>'+(isNew?"Nouvelle analyse":"Modifier l'analyse")+'</h2><button class="pclose" onclick="closeOverlay()">✕</button></div>'+
+    '<div class="mbody">'+
+      '<div class="frow"><label>Thème<select id="a-th">'+
+        state.themes.map(function(t){return '<option value="'+t.id+'"'+(t.id===cur.themeId?' selected':'')+'>'+esc(t.label)+'</option>';}).join('')+
+      '</select></label></div>'+
+      '<div class="frow">'+
+        '<label>Intitulé<input type="text" id="a-lb" value="'+esc(cur.label)+'" placeholder="ex: Glycémie"></label>'+
+        '<label>Précision<input type="text" id="a-pr" value="'+esc(cur.precision)+'" placeholder="ex: À jeun"></label>'+
+      '</div>'+
+      '<div class="frow">'+
+        '<label>Unité<input type="text" id="a-un" value="'+esc(cur.unit)+'" placeholder="ex: g/L"></label>'+
+        '<label>Norme min<input type="number" id="a-mn" value="'+esc(cur.normMin)+'"></label>'+
+        '<label>Norme max<input type="number" id="a-mx" value="'+esc(cur.normMax)+'"></label>'+
+      '</div>'+
+      '<label class="flbl">Informations / signification<textarea id="a-in" rows="4">'+esc(cur.info)+'</textarea></label>'+
+    '</div>'+
+    '<div class="mfoot">'+
+      '<button class="bs" onclick="closeOverlay()">Annuler</button>'+
+      '<button class="bp" onclick="saveAnalysis(\''+cur.id+'\','+isNew+')">Enregistrer</button>'+
+    '</div></div>');
+}
+
+function saveAnalysis(id,isNew){
+  var cur={id:id,
+    themeId:document.getElementById('a-th').value,
+    label:document.getElementById('a-lb').value,
+    precision:document.getElementById('a-pr').value,
+    unit:document.getElementById('a-un').value,
+    normMin:parseFloat(document.getElementById('a-mn').value)||0,
+    normMax:parseFloat(document.getElementById('a-mx').value)||0,
+    info:document.getElementById('a-in').value
+  };
+  if(isNew){ state.analyses.push(cur); }
+  else { for(var i=0;i<state.analyses.length;i++) if(state.analyses[i].id===id){state.analyses[i]=cur;break;} }
+  closeOverlay(); render();
+}
+
+function addTheme(){
+  var label=prompt('Nom du nouveau thème :');
+  if(label){ state.themes.push({id:uid(),label:label}); render(); }
+}
+
+// ═══════════════════ EXPORT / IMPORT
+function exportData(){
+  var data={version:1,themes:state.themes,analyses:state.analyses,events:state.events};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='medibilan_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  URL.revokeObjectURL(url); toast('Export réussi !','tok');
+}
+
+document.getElementById('importFile').addEventListener('change',function(e){
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var data=JSON.parse(ev.target.result);
+      if(!data.themes||!data.analyses||!data.events) throw 0;
+      confirm2('Remplacer toutes les données ?',
+        'Le fichier contient '+data.events.length+' prélèvements et '+data.analyses.length+' analyses. Vos données actuelles seront remplacées.',
+        function(){
+          state.themes=data.themes; state.analyses=data.analyses; state.events=data.events;
+          state.detailId=null; render();
+          toast('Import réussi : '+data.events.length+' prélèvements.','tok');
+        });
+    }catch(err){toast('Fichier JSON invalide.','terr');}
+  };
+  reader.readAsText(file); e.target.value='';
+});
+
+// ═══════════════════ TOAST
+function toast(msg,cls){
+  var d=document.createElement('div');
+  d.className='toast '+(cls||'tok'); d.textContent=msg;
+  document.body.appendChild(d);
+  setTimeout(function(){d.remove();},3000);
+}
+
+// ═══════════════════ INIT
+render();
+</script>
+</body>
+</html>
